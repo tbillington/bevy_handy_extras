@@ -1,3 +1,59 @@
+#[macro_export]
+macro_rules! some_continue {
+    ($q:expr) => {
+        match $q {
+            Some(m) => m,
+            _ => continue,
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! ok_continue {
+    ($q:expr) => {
+        match $q {
+            Ok(m) => m,
+            _ => continue,
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! get_continue {
+    ($q:expr, $r:expr) => {
+        match $q.get($r) {
+            Ok(m) => m,
+            _ => continue,
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! get_mut_continue {
+    ($q:expr, $r:expr) => {
+        match $q.get_mut($r) {
+            Ok(m) => m,
+            _ => continue,
+        }
+    };
+}
+
+/// To run a system from within another system
+/// ```rust
+/// fn foo(mut commands: Commands) {
+///     commands.add(run_system!(my_system));
+/// }
+/// ```
+#[macro_export]
+macro_rules! run_system {
+    ($s:ident) => {
+        |world: &mut World| {
+            use bevy::ecs::system::RunSystemOnce;
+            world.run_system_once($s);
+        }
+    };
+}
+
 // TODO: variants that throw in debug but return in release?
 
 /// Unwraps an [`Option`], returning on [`Option::None`]
@@ -12,10 +68,22 @@ macro_rules! some {
     };
 }
 
+/// Unwraps an [`Result`], returning on [`Result::Err`]
+#[allow(unused)]
+#[macro_export]
+macro_rules! ok {
+    ($q:expr) => {
+        match $q {
+            Ok(m) => m,
+            _ => return,
+        }
+    };
+}
+
 #[allow(unused)]
 #[macro_export]
 macro_rules! get {
-    ($q:expr,$r:expr) => {
+    ($q:expr, $r:expr) => {
         match $q.get($r) {
             Ok(m) => m,
             _ => return,
@@ -25,11 +93,33 @@ macro_rules! get {
 
 #[allow(unused)]
 #[macro_export]
+macro_rules! get_else {
+    ($q:expr, $r:expr, $e:expr) => {
+        match $q.get($r) {
+            Ok(m) => m,
+            _ => return $e,
+        }
+    };
+}
+
+#[allow(unused)]
+#[macro_export]
 macro_rules! get_mut {
-    ($q:expr,$r:expr) => {
+    ($q:expr, $r:expr) => {
         match $q.get_mut($r) {
             Ok(m) => m,
             _ => return,
+        }
+    };
+}
+
+#[allow(unused)]
+#[macro_export]
+macro_rules! get_mut_else {
+    ($q:expr, $r:expr, $e:expr) => {
+        match $q.get_mut($r) {
+            Ok(m) => m,
+            _ => return $e,
         }
     };
 }
@@ -64,5 +154,31 @@ macro_rules! write_cleared {
         let d = $dst;
         d.clear();
         let _ = d.write_fmt(core::format_args!($($arg)*));
+    };
+}
+
+#[macro_export]
+#[allow(clippy::crate_in_macro_def)]
+macro_rules! pub_prelude {
+    ($($m:ident),+) => {
+        $(
+            #[allow(unused)]
+            pub mod $m {
+                pub use crate::$m::prelude::*;
+            }
+        )+
+    };
+}
+
+#[macro_export]
+#[allow(clippy::crate_in_macro_def)]
+macro_rules! pub_crate_prelude {
+    ($($m:ident),+) => {
+        $(
+            #[allow(unused)]
+            pub(crate) mod $m {
+                pub(crate) use crate::$m::prelude::*;
+            }
+        )+
     };
 }
