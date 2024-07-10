@@ -80,6 +80,14 @@ macro_rules! ok {
     };
 }
 
+/// Shortcut to get components from a query by [`bevy_ecs::Entity`].
+///
+/// ```rust
+/// fn my_sys(transform: Query<&Transform>) {
+///     let my_entity: Entity = ...;
+///     let window = get!(transform, my_entity);
+/// }
+/// ```
 #[allow(unused)]
 #[macro_export]
 macro_rules! get {
@@ -124,6 +132,13 @@ macro_rules! get_mut_else {
     };
 }
 
+/// Shortcut to get components from a single entity query by [`bevy_ecs::Entity`].
+///
+/// ```rust
+/// fn my_sys(window: Query<&Window, With<PrimaryWindow>>) {
+///     let window = get_single!(window);
+/// }
+/// ```
 #[allow(unused)]
 #[macro_export]
 macro_rules! get_single {
