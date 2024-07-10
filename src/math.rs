@@ -62,3 +62,22 @@ pub fn inv_lerp(a: f32, b: f32, v: f32) -> f32 {
 pub fn remap(i_min: f32, i_max: f32, o_min: f32, o_max: f32, v: f32) -> f32 {
     lerp(o_min, o_max, inv_lerp(i_min, i_max, v))
 }
+
+#[allow(unused)]
+pub trait Clamp01 {
+    fn clamp01(self) -> Self;
+}
+
+impl Clamp01 for f32 {
+    #[inline]
+    fn clamp01(self) -> Self {
+        #[allow(clippy::manual_clamp)]
+        if self < 0. {
+            0.
+        } else if self > 1. {
+            1.
+        } else {
+            self
+        }
+    }
+}
